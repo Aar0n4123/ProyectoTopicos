@@ -69,20 +69,20 @@ class Application {
       // Start server
       this.app.listen(this.port, () => {
         console.log(`
-╔═══════════════════════════════════════════════════════════╗
-║  🚀 Image Manipulation API                                ║
-║  📡 Server running on http://localhost:${this.port}           ║
-║  📚 Endpoints:                                            ║
-║     POST /auth/register                                   ║
-║     POST /auth/login                                      ║
-║     POST /images/resize                                   ║
-║     POST /images/crop                                     ║
-║     POST /images/format                                   ║
-║     POST /images/rotate                                   ║
-║     POST /images/filter                                   ║
-║     POST /images/pipeline                                 ║
-║  🏥 Health: GET /health                                   ║
-╚═══════════════════════════════════════════════════════════╝
+
+  🚀 Image Manipulation API                                
+  📡 Server running on http://localhost:${this.port}           
+  📚 Endpoints:                                            
+       POST /auth/register                                   
+     POST /auth/login                                      
+     POST /images/resize                                   
+     POST /images/crop                                     
+     POST /images/format                                  
+     POST /images/rotate                                  
+     POST /images/filter                                   
+     POST /images/pipeline                                 
+  🏥 Health: GET /health                                   
+
         `)
       })
     } catch (error) {
