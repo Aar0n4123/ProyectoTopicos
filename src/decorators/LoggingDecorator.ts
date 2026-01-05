@@ -23,7 +23,7 @@ export class LoggingDecorator implements IImageHandler {
         level: "info",
         user: userEmail,
         endpoint: this.endpoint,
-        params: this.sanitizeParams(request.params),
+        params: this.sanitizeParams(request.params as unknown as Record<string, unknown>),
         duration,
         result: "success",
       })
@@ -39,7 +39,7 @@ export class LoggingDecorator implements IImageHandler {
         level: "error",
         user: userEmail,
         endpoint: this.endpoint,
-        params: this.sanitizeParams(request.params),
+        params: this.sanitizeParams(request.params as unknown as Record<string, unknown>),
         duration,
         result: "error",
         message: errorMessage,

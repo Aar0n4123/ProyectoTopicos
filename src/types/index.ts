@@ -9,9 +9,7 @@ export interface IUser {
   createdAt: Date
 }
 
-export interface IUserDocument extends IUser, Document {
-  _id: string
-}
+export interface IUserDocument extends Omit<IUser, "id">, Document {}
 
 // Generic API Response
 export interface ApiResponse<T> {

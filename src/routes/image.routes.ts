@@ -169,7 +169,7 @@ export class ImageRoutes {
       const imageRequest: ImageRequest = {
         file: req.file,
         token: this.extractToken(req),
-        params: { angle },
+        params: { angle: angle as 90 | 180 | 270 },
       }
 
       const result = await handler.handle(imageRequest)
