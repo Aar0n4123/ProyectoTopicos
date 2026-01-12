@@ -4,6 +4,7 @@ import { DatabaseConfig } from "./config/database"
 import { AuthService } from "./services/AuthService"
 import { FileLogger } from "./logging/FileLogger"
 import { AuthRoutes, ImageRoutes } from "./routes"
+import { MongoLogger } from "./logging/MongoLogger"
 
 // Load environment variables
 dotenv.config()
