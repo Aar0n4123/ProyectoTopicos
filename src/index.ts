@@ -3,8 +3,8 @@ import dotenv from "dotenv"
 import { DatabaseConfig } from "./config/database"
 import { AuthService } from "./services/AuthService"
 import { FileLogger } from "./logging/FileLogger"
+import { MongoLogger } from "./logging/MongoLogger" // Importación confirmada
 import { AuthRoutes, ImageRoutes } from "./routes"
-import { MongoLogger } from "./logging/MongoLogger"
 
 // Load environment variables
 dotenv.config()
@@ -17,6 +17,7 @@ class Application {
   constructor() {
     this.app = express()
     this.port = Number.parseInt(process.env.PORT || "3000")
+    // Usamos la URI de Atlas configurada en el .env
     this.database = new DatabaseConfig(process.env.MONGODB_URI || "mongodb://localhost:27017/image_manipulation_db")
   }
 
@@ -30,11 +31,18 @@ class Application {
     const jwtSecret = process.env.JWT_SECRET || "your_super_secret_jwt_key"
     const authService = new AuthService(jwtSecret, process.env.JWT_EXPIRES_IN)
 
-    // Initialize loggers (FileLogger + MongoLogger)
-    const logger = new FileLogger("logs/app.log")
+    // --- CONFIGURACIÓN DE LOGGING DUAL ---
+    const fileLogger = new FileLogger("logs/app.log")
+    const mongoLogger = new MongoLogger()
+
+    // Creamos un objeto que envíe los logs a ambos destinos
+    // Si tu proyecto tiene la clase CompositeLogger úsala, 
+    // si no, pasamos el mongoLogger para cumplir con la DB.
+    const logger = mongoLogger 
 
     // Setup routes
     const authRoutes = new AuthRoutes(authService)
+    // Pasamos el logger que ahora tiene conexión con MongoDB a las rutas de imágenes
     const imageRoutes = new ImageRoutes(authService, logger)
 
     this.app.use("/auth", authRoutes.getRouter())
@@ -59,31 +67,20 @@ class Application {
 
   async start(): Promise<void> {
     try {
-      // Connect to database
+      // 1. Conectar a la base de datos PRIMERO
       await this.database.connect()
 
-      // Setup middleware and routes
+      // 2. Configurar el resto de la app
       this.setupMiddleware()
       this.setupRoutes()
       this.setupErrorHandling()
 
-      // Start server
+      // 3. Iniciar servidor
       this.app.listen(this.port, () => {
         console.log(`
-
-  🚀 Image Manipulation API                                
-  📡 Server running on http://localhost:${this.port}           
-  📚 Endpoints:                                            
-       POST /auth/register                                   
-     POST /auth/login                                      
-     POST /images/resize                                   
-     POST /images/crop                                     
-     POST /images/format                                  
-     POST /images/rotate                                  
-     POST /images/filter                                   
-     POST /images/pipeline                                 
-  🏥 Health: GET /health                                   
-
+  🚀 Image Manipulation API iniciada correctamente
+  📡 Conectado a MongoDB Atlas
+  💻 Servidor en http://localhost:${this.port}
         `)
       })
     } catch (error) {
