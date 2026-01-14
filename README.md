@@ -50,7 +50,7 @@ npm install
 
 Copiar el archivo `.env.example` a `.env`:
 ```bash
-cp .env.example .env
+cp .env.example.example .env.example
 ```
 
 Editar `.env` con tus valores:

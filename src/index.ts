@@ -3,11 +3,13 @@ import dotenv from "dotenv"
 import { DatabaseConfig } from "./config/database"
 import { AuthService } from "./services/AuthService"
 import { FileLogger } from "./logging/FileLogger"
-import { MongoLogger } from "./logging/MongoLogger" // Importación confirmada
+import { MongoLogger } from "./logging/MongoLogger"
+import { CompositeLogger } from "./logging/CompositeLogger"
 import { AuthRoutes, ImageRoutes } from "./routes"
+import {ILogger} from "./logging/ILogger";
 
-// Load environment variables
-dotenv.config()
+// Load environment variables from .env.example
+dotenv.config({ path: ".env.example" })
 
 class Application {
   private app: Express
@@ -17,7 +19,7 @@ class Application {
   constructor() {
     this.app = express()
     this.port = Number.parseInt(process.env.PORT || "3000")
-    // Usamos la URI de Atlas configurada en el .env
+    // Usamos la URI de Atlas configurada en el .env.example
     this.database = new DatabaseConfig(process.env.MONGODB_URI || "mongodb://localhost:27017/image_manipulation_db")
   }
 
@@ -31,18 +33,28 @@ class Application {
     const jwtSecret = process.env.JWT_SECRET || "your_super_secret_jwt_key"
     const authService = new AuthService(jwtSecret, process.env.JWT_EXPIRES_IN)
 
-    // --- CONFIGURACIÓN DE LOGGING DUAL ---
+    // --- CONFIGURACIÓN DE LOGGING DINÁMICA ---
+    const loggerType = process.env.LOGGER_TYPE || "dual"
     const fileLogger = new FileLogger("logs/app.log")
     const mongoLogger = new MongoLogger()
 
-    // Creamos un objeto que envíe los logs a ambos destinos
-    // Si tu proyecto tiene la clase CompositeLogger úsala, 
-    // si no, pasamos el mongoLogger para cumplir con la DB.
-    const logger = mongoLogger 
+    let logger: ILogger
 
+    switch (loggerType) {
+      case "file":
+        logger = fileLogger
+        console.log("📝 Logging configurado: Solo Archivo")
+        break
+      case "mongo":
+        logger = mongoLogger
+        console.log("🍃 Logging configurado: Solo MongoDB")
+        break
+      default:
+        logger = new CompositeLogger([fileLogger, mongoLogger])
+        console.log("⚖️ Logging configurado: Dual (Archivo + MongoDB)")
+    }
     // Setup routes
     const authRoutes = new AuthRoutes(authService)
-    // Pasamos el logger que ahora tiene conexión con MongoDB a las rutas de imágenes
     const imageRoutes = new ImageRoutes(authService, logger)
 
     this.app.use("/auth", authRoutes.getRouter())
