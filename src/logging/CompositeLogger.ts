@@ -1,6 +1,9 @@
 import type { ILogger } from "./ILogger"
 import type { LogEntry } from "../types"
 
+/**
+ * Implementación del patrón Composite para manejar múltiples loggers simultáneamente
+ */
 export class CompositeLogger implements ILogger {
   private loggers: ILogger[]
 
@@ -8,6 +11,9 @@ export class CompositeLogger implements ILogger {
     this.loggers = loggers
   }
 
+  /**
+   * Envía la entrada de log a todos los loggers registrados en paralelo
+   */
   async log(entry: LogEntry): Promise<void> {
     await Promise.all(
       this.loggers.map(async (logger) => {

@@ -9,10 +9,16 @@ import type {
   PipelineOperation as IPipelineOperation,
 } from "../types"
 
+/**
+ * Interfaz base para todas las operaciones de procesamiento de imágenes
+ */
 interface ImageOperation {
   execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer>
 }
 
+/**
+ * Operación para cambiar el tamaño de una imagen
+ */
 class ResizeOperation implements ImageOperation {
   async execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer> {
     const castParams = params as unknown as ResizeParams
@@ -31,6 +37,9 @@ class ResizeOperation implements ImageOperation {
   }
 }
 
+/**
+ * Operación para recortar una sección de la imagen
+ */
 class CropOperation implements ImageOperation {
   async execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer> {
     const castParams = params as unknown as CropParams
@@ -44,6 +53,9 @@ class CropOperation implements ImageOperation {
   }
 }
 
+/**
+ * Operación para cambiar el formato de salida de la imagen (jpeg, png, webp)
+ */
 class FormatOperation implements ImageOperation {
   async execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer> {
     const castParams = params as unknown as FormatParams
@@ -67,6 +79,9 @@ class FormatOperation implements ImageOperation {
   }
 }
 
+/**
+ * Operación para rotar la imagen en ángulos específicos
+ */
 class RotateOperation implements ImageOperation {
   async execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer> {
     const castParams = params as unknown as RotateParams
@@ -80,6 +95,9 @@ class RotateOperation implements ImageOperation {
   }
 }
 
+/**
+ * Operación para aplicar filtros visuales (blur, sharpen, grayscale)
+ */
 class FilterOperation implements ImageOperation {
   async execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer> {
     const castParams = params as unknown as FilterParams
@@ -103,6 +121,9 @@ class FilterOperation implements ImageOperation {
   }
 }
 
+/**
+ * Operación que permite encadenar múltiples transformaciones de forma secuencial
+ */
 class PipelineOperationImpl implements ImageOperation {
   async execute(buffer: Buffer, params: Record<string, unknown>): Promise<Buffer> {
     const castParams = params as unknown as PipelineParams
@@ -114,6 +135,7 @@ class PipelineOperationImpl implements ImageOperation {
 
     let currentBuffer = buffer
 
+    // Aplicar cada operación de la lista sobre el buffer resultante de la anterior
     for (const operation of operations) {
       const op = operation as unknown as IPipelineOperation
       const { type, params: opParams = {} } = op
@@ -127,6 +149,9 @@ class PipelineOperationImpl implements ImageOperation {
   }
 }
 
+/**
+ * Fábrica para crear instancias de operaciones según su tipo (Patrón Factory)
+ */
 export class OperationFactory {
   getOperation(type: string): ImageOperation {
     switch (type) {

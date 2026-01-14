@@ -11,6 +11,9 @@ import {ILogger} from "./logging/ILogger";
 // Load environment variables from .env.example
 dotenv.config({ path: ".env.example" })
 
+/**
+ * Clase principal de la aplicación Express
+ */
 class Application {
   private app: Express
   private port: number
@@ -19,17 +22,23 @@ class Application {
   constructor() {
     this.app = express()
     this.port = Number.parseInt(process.env.PORT || "3000")
-    // Usamos la URI de Atlas configurada en el .env.example
+    // Configuración de la base de datos usando la URI del entorno
     this.database = new DatabaseConfig(process.env.MONGODB_URI || "mongodb://localhost:27017/image_manipulation_db")
   }
 
+  /**
+   * Configura los middlewares globales de la aplicación
+   */
   private setupMiddleware(): void {
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
   }
 
+  /**
+   * Configura las rutas y servicios de la aplicación
+   */
   private setupRoutes(): void {
-    // Initialize services
+    // Inicialización de servicios de autenticación
     const jwtSecret = process.env.JWT_SECRET || "your_super_secret_jwt_key"
     const authService = new AuthService(jwtSecret, process.env.JWT_EXPIRES_IN)
 
@@ -40,6 +49,7 @@ class Application {
 
     let logger: ILogger
 
+    // Estrategia para elegir el destino de los logs
     switch (loggerType) {
       case "file":
         logger = fileLogger
@@ -53,19 +63,23 @@ class Application {
         logger = new CompositeLogger([fileLogger, mongoLogger])
         console.log("⚖️ Logging configurado: Dual (Archivo + MongoDB)")
     }
-    // Setup routes
+    
+    // Configuración de rutas principales
     const authRoutes = new AuthRoutes(authService)
     const imageRoutes = new ImageRoutes(authService, logger)
 
     this.app.use("/auth", authRoutes.getRouter())
     this.app.use("/images", imageRoutes.getRouter())
 
-    // Health check endpoint
+    // Endpoint de verificación de salud del sistema
     this.app.get("/health", (req, res) => {
       res.json({ status: "OK", timestamp: new Date().toISOString() })
     })
   }
 
+  /**
+   * Middleware para el manejo global de errores
+   */
   private setupErrorHandling(): void {
     this.app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
       console.error("Unhandled error:", err)
@@ -77,17 +91,20 @@ class Application {
     })
   }
 
+  /**
+   * Inicia el ciclo de vida de la aplicación
+   */
   async start(): Promise<void> {
     try {
-      // 1. Conectar a la base de datos PRIMERO
+      // 1. Conectar a la base de datos antes de arrancar el servidor
       await this.database.connect()
 
-      // 2. Configurar el resto de la app
+      // 2. Configurar la estructura de la aplicación
       this.setupMiddleware()
       this.setupRoutes()
       this.setupErrorHandling()
 
-      // 3. Iniciar servidor
+      // 3. Iniciar el servidor Express
       this.app.listen(this.port, () => {
         console.log(`
   🚀 Image Manipulation API iniciada correctamente

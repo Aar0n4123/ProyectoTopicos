@@ -1,5 +1,8 @@
 import mongoose from "mongoose"
 
+/**
+ * Clase para manejar la conexión a la base de datos MongoDB
+ */
 export class DatabaseConfig {
   private mongoUri: string
 
@@ -7,6 +10,9 @@ export class DatabaseConfig {
     this.mongoUri = mongoUri
   }
 
+  /**
+   * Establece la conexión con MongoDB
+   */
   async connect(): Promise<void> {
     try {
       await mongoose.connect(this.mongoUri)
@@ -17,6 +23,9 @@ export class DatabaseConfig {
     }
   }
 
+  /**
+   * Cierra la conexión con la base de datos
+   */
   async disconnect(): Promise<void> {
     await mongoose.disconnect()
     console.log("MongoDB disconnected")

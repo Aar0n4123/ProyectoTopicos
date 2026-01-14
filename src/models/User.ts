@@ -1,6 +1,9 @@
 import mongoose, { Schema, type Model } from "mongoose"
 import type { IUserDocument } from "../types"
 
+/**
+ * Definición del esquema de Mongoose para el modelo de Usuario
+ */
 const userSchema = new Schema<IUserDocument>({
   email: {
     type: String,
@@ -19,6 +22,7 @@ const userSchema = new Schema<IUserDocument>({
   },
 })
 
+// Creación del modelo basado en el esquema definido
 const User: Model<IUserDocument> = mongoose.model<IUserDocument>("User", userSchema)
 
 export default User

@@ -2,6 +2,9 @@ import { Router, type Request, type Response } from "express"
 import type { AuthService } from "../services/AuthService"
 import type { RegisterRequest, LoginRequest, AuthApiResponse } from "../types"
 
+/**
+ * Clase que define las rutas relacionadas con la autenticación de usuarios
+ */
 export class AuthRoutes {
   private router: Router
   private authService: AuthService
@@ -12,16 +15,23 @@ export class AuthRoutes {
     this.setupRoutes()
   }
 
+  /**
+   * Inicializa los endpoints de autenticación
+   */
   private setupRoutes(): void {
     this.router.post("/register", this.register.bind(this))
     this.router.post("/login", this.login.bind(this))
-    // Additional routes can be added here
+    // Se pueden añadir más rutas adicionales aquí
   }
 
+  /**
+   * Endpoint para registrar un nuevo usuario
+   */
   private async register(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body as RegisterRequest
 
+      // Validación básica de campos requeridos
       if (!email || !password) {
         res.status(400).json({
           success: false,
@@ -48,10 +58,14 @@ export class AuthRoutes {
     }
   }
 
+  /**
+   * Endpoint para iniciar sesión
+   */
   private async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body as LoginRequest
 
+      // Validación básica de campos requeridos
       if (!email || !password) {
         res.status(400).json({
           success: false,
@@ -78,6 +92,9 @@ export class AuthRoutes {
     }
   }
 
+  /**
+   * Retorna el router configurado
+   */
   getRouter(): Router {
     return this.router
   }

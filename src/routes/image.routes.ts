@@ -9,6 +9,9 @@ import type { ILogger } from "../logging/ILogger"
 import { OperationFactory } from "../services/ImageService"
 import type { ImageRequest } from "../types"
 
+/**
+ * Clase que define las rutas para la manipulación de imágenes
+ */
 export class ImageRoutes {
   private router: Router
   private authService: AuthService
@@ -23,6 +26,9 @@ export class ImageRoutes {
     this.setupRoutes()
   }
 
+  /**
+   * Configura los endpoints de procesamiento de imágenes
+   */
   private setupRoutes(): void {
     this.router.post("/resize", upload.single("image"), this.handleResize.bind(this))
     this.router.post("/crop", upload.single("image"), this.handleCrop.bind(this))
@@ -32,14 +38,21 @@ export class ImageRoutes {
     this.router.post("/pipeline", upload.single("image"), this.handlePipeline.bind(this))
   }
 
+  /**
+   * Crea una cadena de manejadores decorados para una operación específica
+   */
   private createHandler(operationType: string, endpoint: string): IImageHandler {
     const operation = this.operationFactory.getOperation(operationType)
     const baseHandler = new BaseImageHandler(operation, operationType)
+    // Aplicación del patrón Decorator para Auth y Logging
     const authHandler = new AuthDecorator(baseHandler, this.authService)
     const loggingHandler = new LoggingDecorator(authHandler, this.logger, endpoint)
     return loggingHandler
   }
 
+  /**
+   * Extrae el token Bearer del encabezado Authorization
+   */
   private extractToken(req: Request): string | undefined {
     const authHeader = req.headers.authorization
     if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -48,6 +61,9 @@ export class ImageRoutes {
     return undefined
   }
 
+  /**
+   * Manejador para el redimensionamiento de imágenes
+   */
   private async handleResize(req: Request, res: Response): Promise<void> {
     try {
       if (!req.file) {
@@ -76,6 +92,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Manejador para el recorte de imágenes
+   */
   private async handleCrop(req: Request, res: Response): Promise<void> {
     try {
       if (!req.file) {
@@ -114,6 +133,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Manejador para el cambio de formato de imágenes
+   */
   private async handleFormat(req: Request, res: Response): Promise<void> {
     try {
       if (!req.file) {
@@ -148,6 +170,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Manejador para la rotación de imágenes
+   */
   private async handleRotate(req: Request, res: Response): Promise<void> {
     try {
       if (!req.file) {
@@ -182,6 +207,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Manejador para la aplicación de filtros a imágenes
+   */
   private async handleFilter(req: Request, res: Response): Promise<void> {
     try {
       if (!req.file) {
@@ -216,6 +244,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Manejador para el procesamiento secuencial (Pipeline) de imágenes
+   */
   private async handlePipeline(req: Request, res: Response): Promise<void> {
     try {
       if (!req.file) {
@@ -250,6 +281,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Método centralizado para el manejo y respuesta de errores
+   */
   private handleError(error: unknown, res: Response): void {
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
 
@@ -264,6 +298,9 @@ export class ImageRoutes {
     }
   }
 
+  /**
+   * Retorna el router configurado
+   */
   getRouter(): Router {
     return this.router
   }
